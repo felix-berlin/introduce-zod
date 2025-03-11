@@ -1,0 +1,37 @@
+---
+import { actions, isInputError } from "astro:actions";
+
+const result = Astro.getActionResult(actions.newsletter);
+
+const inputErrors = isInputError(result?.error) ? result.error.fields : {};
+---
+
+<form method="POST" action={actions.newsletter} novalidate>
+  <label for="email">E-mail</label>
+  <input id="email" required type="email" name="email" />
+  {inputErrors.email && <p id="error">{inputErrors.email.join(",")}</p>}
+  <label>
+    <input required type="checkbox" name="terms" />
+    I agree to the terms of service
+  </label>
+  {inputErrors.terms && <p id="error">{inputErrors.terms.join(",")}</p>}
+  <button>Sign up</button>
+</form>
+
+<script>
+  import { actions } from "astro:actions";
+  import { navigate } from "astro:transitions/client";
+
+  const form = document.querySelector("form");
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const { error } = await actions.newsletter(formData);
+    console.log(error);
+    if (error) {
+      alert("Error!");
+    }
+
+    if (!error) alert("Success!");
+  });
+</script>
